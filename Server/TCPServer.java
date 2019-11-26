@@ -3,6 +3,7 @@ import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.sql.Timestamp;
   
 public class TCPServer { 
     
@@ -19,7 +20,6 @@ public class TCPServer {
             String serverIP = (Inet4Address.getLocalHost().getHostAddress());
             System.out.println("IP Address: " + serverIP);
             System.out.println("IP Hostname: " + InetAddress.getLocalHost().getHostName());
-            System.out.println("Running TCP on Port " + port);
          } 
          catch(UnknownHostException uhe){
             System.out.println("Exception caught while setting Server IP");
@@ -28,10 +28,13 @@ public class TCPServer {
          
          try {
             sSocket = new ServerSocket(port);
+            System.out.println("=======================================================");
+            System.out.println("Server started!");
+            System.out.println("Running TCP on Port " + port);
          
             while(true) {
-               for (int b = 0; b < threads.size(); b++) {
-                  if (threads.get(b).getSocket().isConnected() == false) {
+               for (int i = 0; i < threads.size(); i++) {
+                  if (threads.get(i).getSocket().isConnected() == false) {
                      clientsConnected--;                     
                   }
                }
@@ -45,27 +48,22 @@ public class TCPServer {
                   clientsConnected++;      
                }
                catch(IOException e1) {
-                  System.out.println("Uh oh! An exception");
+                  System.out.println("Uh oh! An exception occured when accepting a new client connection");
                }
             
-               System.out.println("Client connected!");
                String ipConnected = cSocket.getRemoteSocketAddress().toString();
-               System.out.println("Client connected!  IP: "+ ipConnected.substring(1) + "\n");
-               
-               System.out.println(cSocket);
-               
+               System.out.println(new Timestamp(System.currentTimeMillis()) + " New connection from: " + ipConnected.substring(1) + "\n");
+                              
                synchronized(threads) {
                
                   threads.add(new ClientThread(cSocket));
-                  
                   Thread t = new Thread(threads.get(clientsConnected - 1));
                   t.start();
-                  
                }
             } 
          } 
          catch(IOException e1) {
-            System.out.println("Uh oh! An exception");
+            System.out.println("Uh oh! An exception occured");
          }
    }
    
@@ -75,11 +73,14 @@ public class TCPServer {
     */
       
    class ClientThread extends Thread {
+      String clientIP;
       Socket cSocket = null;
+      String clientMsg;
+      String serverResponse;
       
       public ClientThread(Socket clientsSocket) {
          cSocket = clientsSocket;
-         
+         clientIP = cSocket.getRemoteSocketAddress().toString();
       }
          
       public Socket getSocket() {
@@ -89,27 +90,43 @@ public class TCPServer {
       
       public void run() {
          PrintWriter pwt = null;
-         Scanner scn = null;
-         boolean message_sent = false;
-         boolean gameStarted = false;
          
          try {
-               pwt = new PrintWriter(new OutputStreamWriter(cSocket.getOutputStream()));
-               scn = new Scanner(new InputStreamReader(cSocket.getInputStream()));
-         }
-         catch (IOException e1) {
-            System.out.println("Uh oh! An exception");
-         }
-         while (getSocket().isConnected()) {
-            System.out.println("Socket was successfully connected");
-            try{
-               sleep(1000);
+            pwt = new PrintWriter(new OutputStreamWriter(cSocket.getOutputStream()));
+            InputStream inputStream = cSocket.getInputStream();
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader br = new BufferedReader(inputStreamReader);
+            Timestamp ts;
+            while (getSocket().isConnected()) {
+               clientMsg = br.readLine();
+               
+               if(clientMsg != null) {
+                  serverResponse = "Sending to client: " + clientIP.substring(1) + " " + new Timestamp(System.currentTimeMillis()) + " " + clientMsg;
+                  System.out.println(serverResponse);
+                  pwt.println(clientMsg);
+                  pwt.flush();
+               }
+               else {               
+                  serverResponse = "Terminating connection...";
+                  System.out.println(serverResponse);
+                  pwt.println(clientMsg);
+                  pwt.flush();
+                  break;
+               }
+             
+               try{
+                  sleep(1000);
+               }
+               catch (InterruptedException e1) {
+                  System.out.println("Interrupted Exception while trying to reader client data");
+               }
             }
-            catch (InterruptedException e1) {
-               System.out.println("Interrupted Exception");
-            }
          }
-         
+         catch (IOException ioe) {
+            System.out.println("IOException during creation of input/output components in client thread class");
+            System.out.println(ioe);
+         }
+   
          System.out.println("Client disconnected!");
          clientsConnected--;
       }
