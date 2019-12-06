@@ -30,12 +30,7 @@ public class Main {
       }
       while(serverSetupSuccess != true);
       
-      if(protocol.equals("TCP")) {
-         new TCPServer(serverPort);
-      }
-      else {
-         new UDPServer(serverPort);
-      }
+      new Server(serverPort, protocol);
    }
 }
 
