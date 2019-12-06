@@ -12,6 +12,10 @@ import java.util.Scanner;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
+
+/**
+ * Client program for both UDP and TCP connection that allows the user to communicate with the server with timestamps
+ **/
 public class NetworkClient {
  /**
   * Starts the TCP Connection in the client and allows the user to communicate with the server until it terminates the connection with the input “end”
