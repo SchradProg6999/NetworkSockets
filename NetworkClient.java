@@ -70,21 +70,24 @@ public class NetworkClient {
   Scanner scan = new Scanner(System.in);
   DatagramSocket socket = new DatagramSocket();
   String input = "";
+  String loop = "";
 
   Date date = new Date();
   SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+  System.out.println("Connected to server:" + IPaddress + "\n using UDP " + "\n Port Number:" + portNumber + "\n at " + dateFormat.format(date));
 
-  while (input.equals("end") == false) {
-   System.out.println("Connected to server:" + IPaddress + "\n using UDP+ " + "\n Port Number:" + portNumber + "\n at" + dateFormat.format(date));
+  while (loop.equals("end") == false) {
    System.out.println("Enter the message to be sent to the server, type end to terminate connection:");
-   input = scan.nextLine();
+   loop = scan.nextLine();
+   input = loop;
    byte[] size = input.getBytes();
 
-   System.out.println(input + " sent at:" + dateFormat.format(date));
+   System.out.println(input + " sent at: " + dateFormat.format(date));
    input = input + " sent at:" + dateFormat.format(date);
    InetAddress server = InetAddress.getByName(IPaddress);
    DatagramPacket request = new DatagramPacket(size, size.length, server, portNumber);
    socket.send(request);
+
   }
   System.out.println("Terminating connection at:" + dateFormat.format(date));
   socket.close();
