@@ -32,21 +32,31 @@ public class Server {
 
         if(this.protocol.equals("UDP")) {
             try {
-                this.datSock = new DatagramSocket(port);
-                this.receive = new byte[65535];
-                this.dgPack = null;
+                datSock = new DatagramSocket(port);
+                dgPack = null;
 
                 System.out.println("=======================================================");
                 System.out.println("Server started!");
                 System.out.println("Running UDP on Port " + port);
 
                 while(true) {
+                    receive = new byte[63000];
+
                     try {
-                        this.dgPack = new DatagramPacket(receive, receive.length);
-                        this.datSock.receive(this.dgPack);
-                        //String ipConnected = this.datSock.getRemoteSocketAddress().toString();
-                        //System.out.println(new Timestamp(System.currentTimeMillis()) + " New connection from: " + ipConnected.substring(1) + "\n");
-                        System.out.println("Client: " + receive);
+                        dgPack = new DatagramPacket(receive, receive.length);
+                        datSock.receive(this.dgPack);
+                        
+                        String ipConnected = dgPack.getAddress().toString();
+                        System.out.println(new Timestamp(System.currentTimeMillis()) + " New connection from: " + ipConnected.substring(1) + "\n");
+                        
+                        System.out.println("Sending to client: " + " " + ipConnected.substring(1) + " " + new Timestamp(System.currentTimeMillis()) + " " + stringBuilder(receive));
+                        System.out.println("PORT: " + dgPack.getPort());
+                        InetAddress clientIP = InetAddress.getByName(ipConnected.substring(1));
+                        DatagramPacket response = new DatagramPacket(receive, receive.length, clientIP, 23001);
+                        datSock.send(response);
+                        
+                        receive = null;
+                        
                     }
                     catch(IOException ioe) {
                         System.out.println("Error with datagram packet: " + ioe);
@@ -93,6 +103,25 @@ public class Server {
 
         }
    }
+   
+   
+   // helper funciton to build the string from byte array recieved over the network
+   // Credit: https://www.geeksforgeeks.org/working-udp-datagramsockets-java/
+   public StringBuilder stringBuilder(byte[] byteArr) {
+     
+      if (byteArr == null) {
+         return null;
+      }
+   
+      StringBuilder sb = new StringBuilder(); 
+      int i = 0; 
+   
+      while (byteArr[i] != 0) { 
+         sb.append((char) byteArr[i]); 
+         i++; 
+      } 
+      return sb; 
+   } 
    
    /**
       ClientThreadTCP - creates new thread upon socket connection
