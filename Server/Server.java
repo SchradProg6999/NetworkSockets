@@ -40,12 +40,12 @@ public class Server {
                 System.out.println("Server started!");
                 System.out.println("Running UDP on Port " + port);
 
-//                String ipConnected = this.datSock.getRemoteSocketAddress().toString();
-//                System.out.println(new Timestamp(System.currentTimeMillis()) + " New connection from: " + ipConnected.substring(1) + "\n");
                 while(true) {
                     try {
                         this.dgPack = new DatagramPacket(receive, receive.length);
                         this.datSock.receive(this.dgPack);
+                        //String ipConnected = this.datSock.getRemoteSocketAddress().toString();
+                        //System.out.println(new Timestamp(System.currentTimeMillis()) + " New connection from: " + ipConnected.substring(1) + "\n");
                         System.out.println("Client: " + receive);
                     }
                     catch(IOException ioe) {
