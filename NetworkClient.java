@@ -27,7 +27,6 @@ public class NetworkClient {
   String input = "";
   String ReceiveFromServer = "";
   SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-  InetAddress homeAddress = InetAddress.getLocalHost();
 
   try {
    Date date = new Date();
