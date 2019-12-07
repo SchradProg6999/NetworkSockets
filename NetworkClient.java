@@ -87,6 +87,12 @@ public class NetworkClient {
    InetAddress server = InetAddress.getByName(IPaddress);
    DatagramPacket request = new DatagramPacket(size, size.length, server, portNumber);
    socket.send(request);
+   request = new DatagramPacket(size,size.length);
+   socket.receive(request);
+   String serverEcho = new String( request.getData(), 0 , request.getLength());
+   
+   System.out.println("Message from server: "+serverEcho);
+   
 
   }
   System.out.println("Terminating connection at:" + dateFormat.format(date));
