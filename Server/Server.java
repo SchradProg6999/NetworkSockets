@@ -51,8 +51,9 @@ public class Server {
                         
                         System.out.println("Sending to client: " + " " + ipConnected.substring(1) + " " + new Timestamp(System.currentTimeMillis()) + " " + stringBuilder(receive));
                         System.out.println("PORT: " + dgPack.getPort());
-                        InetAddress clientIP = InetAddress.getByName(ipConnected.substring(1));
-                        DatagramPacket response = new DatagramPacket(receive, receive.length, clientIP, 23001);
+                        InetAddress clientIP = dgPack.getAddress();
+                        int portNum = dgPack.getPort();
+                        DatagramPacket response = new DatagramPacket(receive, receive.length, clientIP, portNum);
                         datSock.send(response);
                         
                         receive = null;
