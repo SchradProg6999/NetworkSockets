@@ -1,3 +1,9 @@
+/**
+ * Server program
+ * Can handle both TCP and UDP clients
+ * NSSA 290.01
+ * Professor Mason
+ */
 import java.net.*; 
 import java.io.*; 
 import java.awt.*;
@@ -15,7 +21,7 @@ public class Server {
     private byte[] receive;
     private DatagramPacket dgPack;
 
-    ArrayList<ClientThread> threads = new ArrayList<ClientThread>();
+    ArrayList<ClientThread> threads = new ArrayList<ClientThread>(); //Needed to keep track of threads for TCP protocol
   
     // constructor with port 
     public Server(int port, String protocol) {
@@ -32,7 +38,7 @@ public class Server {
 
         if(this.protocol.equals("UDP")) {
             try {
-                datSock = new DatagramSocket(port);
+                datSock = new DatagramSocket(port); // Opening socket for communication via UDP
                 dgPack = null;
 
                 System.out.println("=======================================================");
@@ -40,23 +46,24 @@ public class Server {
                 System.out.println("Running UDP on Port " + port);
 
                 while(true) {
-                    receive = new byte[63000];
+                    receive = new byte[63000]; //Byte Array needed for the message received and sent
 
                     try {
-                        dgPack = new DatagramPacket(receive, receive.length);
-                        datSock.receive(this.dgPack);
+                        dgPack = new DatagramPacket(receive, receive.length); //Setting up the DatagramPacket to receive from Client
+                        datSock.receive(dgPack); 
                         
-                        String ipConnected = dgPack.getAddress().toString();
+                        String ipConnected = dgPack.getAddress().toString(); //Retrieving IP address from DatagramPacket that was received
                         System.out.println(new Timestamp(System.currentTimeMillis()) + " New connection from: " + ipConnected.substring(1) + "\n");
                         
                         System.out.println("Sending to client: " + " " + ipConnected.substring(1) + " " + new Timestamp(System.currentTimeMillis()) + " " + stringBuilder(receive));
                         System.out.println("PORT: " + dgPack.getPort());
                         InetAddress clientIP = dgPack.getAddress();
-                        int portNum = dgPack.getPort();
-                        DatagramPacket response = new DatagramPacket(receive, receive.length, clientIP, portNum);
-                        datSock.send(response);
                         
-                        receive = null;
+                        int portNum = dgPack.getPort();
+                        DatagramPacket response = new DatagramPacket(receive, receive.length, clientIP, portNum); //Setting up the DatagramPacket to send message back to client
+                        datSock.send(response); //Send the message back to client
+                        
+                        receive = null; //To flush out the message to keep the buffer clean
                         
                     }
                     catch(IOException ioe) {
@@ -81,19 +88,19 @@ public class Server {
                     Socket cSocket = null; /* Client Socket */
 
                     try {
-                      /* Wait for a connection */
+                        /* Wait for a connection */
                         cSocket = sSocket.accept();
                     }
                     catch(IOException e1) {
                         System.out.println("Uh oh! An exception occured when accepting a new client connection");
                     }
 
-                    String ipConnected = cSocket.getRemoteSocketAddress().toString();
+                    String ipConnected = cSocket.getRemoteSocketAddress().toString(); //Getting the IP address of the client that connected
                     System.out.println(new Timestamp(System.currentTimeMillis()) + " New connection from: " + ipConnected.substring(1) + "\n");
 
-                    synchronized(threads) {
+                    synchronized(threads) { //Allows one thread to be made at a time and added to the thread arraylist then gets thread started .
                         threads.add(new ClientThread(cSocket, protocol));
-                        Thread t = new Thread(threads.get(threads.size() - 1));
+                        Thread t = new Thread(threads.get(threads.size() - 1)); //Getting last thread instance that was added to the arraylist to ensure it is the most recent connection
                         t.start();
                     }
                 }
@@ -148,7 +155,7 @@ public class Server {
         }
          
       
-        public void run() {
+        public void run() { //Runs TCP connection
 
         if(this.protocol.equals("TCP")) {
             PrintWriter pwt = null;
@@ -166,14 +173,14 @@ public class Server {
                     if(clientMsg != null) {
                         serverResponse = "Sending to client: " + clientIP.substring(1) + " " + new Timestamp(System.currentTimeMillis()) + " " + clientMsg;
                         System.out.println(serverResponse);
-                        pwt.println(clientMsg);
-                        pwt.flush();
+                        pwt.println(clientMsg); //Adding client message to buffer
+                        pwt.flush(); //flushes the buffer to send the message
                     }
                     else {
                         serverResponse = "Terminating connection...";
                         System.out.println(serverResponse);
-                        pwt.println(clientMsg);
-                        pwt.flush();
+                        pwt.println(clientMsg); //Adding client message to buffer
+                        pwt.flush(); //flushes the buffer to send the message
                         break;
                     }
 
@@ -189,10 +196,6 @@ public class Server {
                 System.out.println("IOException during creation of input/output components in client thread class");
                 System.out.println(ioe);
             }
-        }
-        else {
-            // setting up socket for UDP communication
-            //DatagramSocket dataSock = new DatagramSocket();
         }
 
         System.out.println("Client disconnected!");
