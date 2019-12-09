@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat;
  **/
 public class NetworkClient {
  /**
-  * Starts the TCP Connection in the client and allows the user to communicate with the server until it terminates the connection with the input “end”
+  * Starts the TCP Connection in the client and allows the user to communicate with the server until it terminates the connection with the input end
   * @param String of the IP address
   * @param int of the port number
   **/
@@ -62,7 +62,7 @@ public class NetworkClient {
   }
  }
  /**
-  * Starts the UDP Connection in the client and allows the user to communicate with the server until it terminates the connection with the input “end”
+  * Starts the UDP Connection in the client and allows the user to communicate with the server until it terminates the connection with the input end
   * @param String of the IP address
   * @param int of the port number
   **/
